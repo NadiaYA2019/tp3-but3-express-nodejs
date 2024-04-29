@@ -1,0 +1,59 @@
+// Import the mongoose module
+//const mongoose = require("mongoose");
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+import fs from 'fs'
+import path from 'path'
+import { Tour } from './../../models/tour.model.js'
+
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+//configure l'environnement
+dotenv.config();
+
+
+mongoose.connect(process.env.LOCAL_DATABASE)
+    .then(() => {
+        console.log("connection to MongoDB has succeeded")
+    })
+    .catch(() => {
+        console.log("Connexion à MongoDB a échoué")
+    })
+
+// READ JSON file
+
+
+
+const tours = JSON.parse(fs.readFileSync(`${__dirname}/tours-simple.json`))
+console.log(tours)
+//IMPORT data
+const importData = async () => {
+    try {
+        await Tour.create(tours)
+        console.log('Data successfully loaded')
+        process.exit()
+    }
+    catch (err) {
+        console.log(err)
+    }
+}
+
+const deleteData = async () => {
+    try {
+        await Tour.deleteMany(); //delete all documents
+        console.log('Data successfully deleted')
+        process.exit()
+    }
+    catch (err) {
+        console.log(err)
+    }
+}
+
+if (process.argv[2] === '--import') {
+    importData();
+} else if (process.argv[2] === '--delete') {
+    deleteData();
+}
+//console.log(process.argv[2])
