@@ -14,13 +14,18 @@ const __dirname = path.dirname(__filename);
 dotenv.config();
 
 
-mongoose.connect(process.env.LOCAL_DATABASE)
-    .then(() => {
-        console.log("connection to MongoDB has succeeded")
-    })
-    .catch(() => {
-        console.log("Connexion à MongoDB a échoué")
-    })
+
+//const DB = process.env.DATABASE.replace('<PASSWORD>', process.env.PASSWORD)
+const connectString = "mongodb://localhost:27017/mydb"
+//console.log(DB)
+
+async function connectDB() {
+    await mongoose.connect(connectString)
+}
+connectDB().catch((err) => {
+    console.log("Connexion à MongoDB a échoué", err)
+})
+
 
 // READ JSON file
 

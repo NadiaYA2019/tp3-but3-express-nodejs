@@ -45,6 +45,7 @@ const getAllToursController = async (req, res) => {
 
     try {
         //execute the query
+
         const features = new APIfeatures(Tour.find(), req.query)
             .filter()
             .sort()
@@ -92,7 +93,7 @@ const updateTourController = async (req, res) => {
 
     try {
         const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-            new: true,
+            new: true, // Pour renvoyer la recette mise à jour après l'opération
             runValidators: true
         })
         res.status(200).json({
@@ -216,5 +217,26 @@ const getMonthlyPlan = async (req, res) => {
     }
 }
 
+const filterTours = async (req, res) => {
+    try {
 
-export { getMonthlyPlan, getToursStats, getAllToursController, getTourByIdController, aliasTopTours, createTour, updateTourController, checkBody, deleteTour };
+        const queryString = req.query
+        console.log(queryString)
+
+        const queryOptions = {};
+        if (queryString.limit) queryOptions.limit = parseInt(queryString.limit) || 0
+        if (queryString.sort) queryOptions.sort = queryString.sort || ''; // Set sort field if provided
+        if (queryString.fields) queryOptions.fields = queryString.fields.split(',').join(' ') || ''; // Set fields to include if provided
+        console.log("queryOptions", queryOptions)
+
+        const excludedFields = ['page', 'sort', 'limit', 'fields'];
+        excludedFields.forEach(el => delete queryString[el]);
+
+        const tours = await Tour.find(queryString).sort(queryOptions.sort).limit(queryOptions.limit);
+        return res.status(200).send({ message: "success!", data: tours })
+    } catch (error) {
+        return res.status(500).send({ message: "Error Occured!", error: error.message })
+    }
+}
+
+export { filterTours, getMonthlyPlan, getToursStats, getAllToursController, getTourByIdController, aliasTopTours, createTour, updateTourController, checkBody, deleteTour };
